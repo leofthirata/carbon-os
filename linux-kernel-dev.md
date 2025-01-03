@@ -227,6 +227,7 @@ print $edx
 - IRQ 8-15 are slave handles
 
 ## Heap memory
+https://wiki.osdev.org/Memory_Map_(x86)
 
 - heap memory implementations are memory managers
 - memory limits for 32 bit kernel
@@ -245,7 +246,7 @@ entry 3: addr 0x01003000
 . 
 .
 .
-entry flags
+entry flags bit mask
 7       6      5 4 3   2   1   0
 has_n is_first 0 0 et3 et2 et1 et0
 has_n set if entry to the right of us is part of our allocation, so the last block of allocation will be reset
@@ -255,3 +256,13 @@ two entry types: entry taken and entry free
 ### malloc example
 - start addr 0x01000000
 - assume heap 100MB
+
+to test the implementation,
+make clean
+./build.sh
+gdb
+target remote | qemu-system-i386 -hda ./bin/os.bin -gdb stdio -S -> i386 because its 32 bits to avoid unexpected behaviours
+add-symbol-file ./build/kernelfull.o 0x100000
+break kernel.c:<line where malloc is used>
+c
+print ptr

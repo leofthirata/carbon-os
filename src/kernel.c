@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "idt/idt.h"
 #include "io/io.h"
+#include "memory/heap/kheap.h"
 
 #include <stdint.h> // for uint16_t
 #include <stddef.h> // size_t
@@ -93,6 +94,8 @@ void kernel_main()
     // terminal_writechar('B', COLOUR_WHITE);
     print("CarbonOS!\nHello");
 
+    kheap_init();
+
     // Interrupt Descriptor Table init
     idt_init();
 
@@ -100,4 +103,15 @@ void kernel_main()
     
     // outb(0x60, 0xFF);
     // problem();
+
+    // heap management testing
+    void *ptr = kmalloc(50);
+    void *ptr2 = kmalloc(5000);
+    void *ptr3 = kmalloc(5600);
+    kfree(ptr);
+    void *ptr4 = kmalloc(50);
+    if (ptr || ptr2 || ptr3 || ptr4)
+    {
+
+    }
 }
