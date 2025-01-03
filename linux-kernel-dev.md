@@ -266,3 +266,29 @@ add-symbol-file ./build/kernelfull.o 0x100000
 break kernel.c:<line where malloc is used>
 c
 print ptr
+
+## Paging
+- remap memory addr to another e.g 0x100000 point to 0x200000
+- every page (block) is 4096 bytes by default
+- MMU (memory management unit)
+- physical addresses 0x100000 actually points to physical address 0x100000
+- virtual address 0x100000 might point to physical address 0x200000
+- page directory has 1024 entries (pages) -> page table has 1024 pages -> page has 4096 bytes
+- 1024 * 4096 = 0x400000 for each page table
+- so page directory has 1024 * 1024 * 4096 = 4GB RAM
+
+### Page directory
+- pointer to page tables
+- holds page tables attributes: 
+
+### Page fault exception
+- page fault itr 0x14
+- happens if accessed page has no P flag set
+- happens if you access page without enough priviledge
+- happens if you write to read only pages without being supervisor
+
+### Advantages
+- each process can access same virtual address without writing over each other (different page tables)
+- we can hide physical addresses we dont want to show to processes
+- used to prevent overwriting sensitive data such as code
+- many others
