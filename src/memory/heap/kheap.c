@@ -12,10 +12,14 @@ struct heap_table kernel_heap_table;
 
 void kheap_init()
 {
+    // 25600 entries in heap table
     int total_table_entries = CARBONOS_HEAP_SIZE_BYTES / CARBONOS_HEAP_BLOCK_SIZE;
+    
+    // first entry point to table start address
     kernel_heap_table.entries = (HEAP_BLOCK_TABLE_ENTRY *)(CARBONOS_HEAP_TABLE_START_ADDR);
     kernel_heap_table.total = total_table_entries;
 
+    // calculates the heap table ending address (start + total size)
     void *end = (void *)(CARBONOS_HEAP_START_ADDR + CARBONOS_HEAP_SIZE_BYTES); // end of heap
 
     int res = heap_create(&kernel_heap, (void *)(CARBONOS_HEAP_START_ADDR), end, &kernel_heap_table);

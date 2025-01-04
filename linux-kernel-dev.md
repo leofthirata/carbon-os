@@ -199,6 +199,7 @@ stepi
 qemu-system-x86_64 -hda ./os.bin
 
 ## Interrupt descriptor table
+https://wiki.osdev.org/Interrupt_Descriptor_Table
 - for protected mode
 - debugging kernel specific line code
 make clean
@@ -292,3 +293,42 @@ print ptr
 - we can hide physical addresses we dont want to show to processes
 - used to prevent overwriting sensitive data such as code
 - many others
+
+# Code review until class 36 
+
+org 0x7c00 to tell the assembler the starting address which is where the bios starts. the bios knows but the assembler doesnt
+
+A equ B - C -> equivalent to A = B - C
+
+jmp short start is to avoid the disk format info (BPB and EBPB) at 0x0000:0x7c00 because the processor will try to execute it but it isnt code
+
+times 33 db 0 is to create 33 bytes to avoid executing data which isnt code. Creates 33 bytes so the start label jumps the BPB and EBPB
+
+db define byte
+dw define word
+dd double word
+
+## To enter protected mode
+
+- disable interrupts with cli
+- enable A20 line (Fast A20 Gate) https://wiki.osdev.org/A20_Line
+- load gdt https://wiki.osdev.org/Global_Descriptor_Table
+- set PE (Protection Enable) bit in CR0 (Control Register 0)
+
+https://wiki.osdev.org/GDT_Tutorial
+dd 0x0 to step 4 bytes -> GDT entry 0 (8 bytes) to null and also the 0x8 offset for the code segment
+
+### 32 bits Kernel Setup
+null descriptor: 8 null bytes as offset
+kernel code segment: limit 0xffff, access byte 0x9a, flags 0xc
+kernel data segment: same as code segment but access byte 0x92
+
+### ATA driver
+https://wiki.osdev.org/ATA_read/write_sectors
+
+### PIC remap
+PIC (program interrupt controller)
+https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interrupt_Controller
+
+## PCI IDE
+- ATA drives to other devices

@@ -18,7 +18,7 @@ step2:
     cli ; clear interrupts
     mov ax, 0x00    ; ax general purpose reg
     mov ds, ax      ; ds data seg
-    mov es, ax ; 0x7c0 to es extra seg
+    mov es, ax      ; es extra seg
     mov ss, ax      ; stack seg
     mov sp, 0x7c00  ; stack pointer
     sti ; enables interrupts
@@ -26,35 +26,37 @@ step2:
 .load_protected:    ; local label
     cli             ; clear itr
     lgdt[gdt_descriptor] ; gdt global descriptor table pointer 
+
+    ; set PE (Protection Enable) bit in CR0 (Control Register 0)
     mov eax, cr0    ; eax 32 bit gpr
     or eax, 0x1     ; or logic operator
     mov cr0, eax    ; cr0 control reg https://wiki.osdev.org/CPU_Registers_x86#CR0
     jmp CODE_SEG:load32
     ; jmp $
 
-; GDT
+; GDT - 32 bit Kernel Setup
 gdt_start:
 gdt_null:
     dd 0x0      ; dd pseudo instruction
     dd 0x0      
 
-; offset 0x8
-gdt_code:       ; CS shoudl point to this
-    dw 0xffff  ; segment first 0-15 bits
-    dw 0        ; base first 0-15 bits
-    db 0        ; base 16-23 bits
-    db 0x9a     ; access byte
-    db 11001111b ; flag
-    db 0        ; base 24-31 bits
+; offset 0x8 limit 0xffff access byte 0x9a flags 0xc
+gdt_code:       ; kernel code segment shoudl point to this
+    dw 0xffff   ; word limit 0-15 bits
+    dw 0        ; word base 16-31 bits
+    db 0        ; byte base 32-39 bits
+    db 0x9a     ; byte access byte 40-47
+    db 11001111b; flag 48-55
+    db 0        ; byte base 56-63 bits
 
-; offset 0x10
-gdt_data:       ; DS, SS, ES, FS, GS
-    dw 0xffff  ; segment first 0-15 bits
-    dw 0        ; base first 0-15 bits
-    db 0        ; base 16-23 bits
-    db 0x92     ; access byte
-    db 11001111b ; flag
-    db 0        ; base 24-31 bits
+; offset 0x10 limit 0xffff access byte 0x92 flags 0xc
+gdt_data:       ; kernel data segment shoudl point to this
+    dw 0xffff   ; word limit 0-15 bits
+    dw 0        ; word base 16-31 bits
+    db 0        ; byte base 32-39 bits
+    db 0x92     ; byte access byte 40-47
+    db 11001111b; flag 48-55
+    db 0        ; byte base 56-63 bits
 
 gdt_end:
 
@@ -63,14 +65,14 @@ gdt_descriptor:
     dd gdt_start
 
 [BITS 32] ; everything below this line is considered as 32bits
-load32:
+load32: ; load kernel into memory and jump into it
     mov eax, 1          ; starting sector, 0 is boot sector
-    mov ecx, 100        ; ecx 32 bit gpr, amount of sectors to be loaded
-    mov edi, 0x0100000  ; edi 32 bit gpr, address to load into
+    mov ecx, 100        ; ecx 32 bit gpr, amount of sectors of nulls to be loaded
+    mov edi, 0x0100000  ; edi 32 bit destination reg, address to load into, 1MB
     call ata_lba_read
-    jmp CODE_SEG:0x0100000
+    jmp CODE_SEG:0x0100000 ; jump to kernel starting addr
 
-ata_lba_read:           ; logical block addressing read
+ata_lba_read:           ; logical block addressing read load sectors into memory
     mov ebx, eax,       ; backup the lba
     ; send the lba highest 8 bits to hard disk controller
     shr eax, 24         ; shift 24 bits to right and stores in eax
@@ -130,5 +132,5 @@ ata_lba_read:           ; logical block addressing read
     ret
 
 
-times 510-($ - $$) db 0 ; fills 510 of data
-dw 0xAA55 ; 55AA
+times 510-($ - $$) db 0 ; fills 510 bytes of data
+dw 0xAA55 ; 55AA to binary file as the end flag

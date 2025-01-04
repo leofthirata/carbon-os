@@ -23,8 +23,8 @@ idt_load:
 
     mov ebx, [ebp+8] ; without +8, it would point to base point
                     ; +4 points to return addr of the caller function
-    lidt [ebx]
-    pop ebp
+    lidt [ebx]      ; lidt Load Global/Interrupt Descriptor Table, loads idt received as param in ebp+8
+    pop ebp         ; restore address ebp was pointing to
     ret
 
 int21h:

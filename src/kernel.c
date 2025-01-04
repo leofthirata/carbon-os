@@ -3,6 +3,7 @@
 #include "io/io.h"
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
+#include "disk/disk.h"
 
 #include <stdint.h> // for uint16_t
 #include <stddef.h> // size_t
@@ -46,6 +47,9 @@ void terminal_writechar(char c, char colour)
 
 void terminal_init()
 {
+    // https://wiki.osdev.org/Printing_To_Screen
+    // 0xB8000 for protected mode
+
     video_mem = (uint16_t *)(0xB8000); // display address
     
     for (int y = 0; y < VGA_HEIGHT; y++)
@@ -101,13 +105,33 @@ void kernel_main()
     // Interrupt Descriptor Table init
     idt_init();
 
-    // page setup
+    // page dir setup
     kernel_chunk = paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT | PAGING_ACCESS_FROM_ALL);
 
     // switch to kernel paging chunk
     paging_switch(paging_4gb_chunk_get_dir(kernel_chunk));
 
+    // paging testing
+    // ptr is our physical addr and 0x1000 is the desired virtual address
+    // we set 0x1000 virtual addr to point to whichever physical addr ptr is pointing to
+    // char *ptr = kzalloc(4096);
+    // paging_set(paging_4gb_chunk_get_dir(kernel_chunk), (void *)0x1000, (uint32_t) ptr | PAGING_ACCESS_FROM_ALL | PAGING_IS_PRESENT | PAGING_IS_WRITEABLE);
+
     paging_enable();
+
+    // paging testing
+    // ptr2 points to 0x1000 which points to physical addr ptr
+    // char *ptr2 = (char *)0x1000;
+    // ptr[0] = 'A';
+    // ptr[1] = 'B';
+    // print(ptr2);
+    // print(ptr);
+
+    // disk read testing
+    char buf[512];
+
+    disk_read_sector(0, 1, buf); // place breakpoint here and, in gdb, print (unsigned char)(buf[0]) to see first byte read
+    // can use bless ./bin/os.bin to read the sector as well
 
     enable_it(); // enable interrupts
     
@@ -115,13 +139,13 @@ void kernel_main()
     // problem();
 
     // heap management testing
-    void *ptr = kmalloc(50);
-    void *ptr2 = kmalloc(5000);
-    void *ptr3 = kmalloc(5600);
-    kfree(ptr);
-    void *ptr4 = kmalloc(50);
-    if (ptr || ptr2 || ptr3 || ptr4)
-    {
+    // void *ptr = kmalloc(50);
+    // void *ptr2 = kmalloc(5000);
+    // void *ptr3 = kmalloc(5600);
+    // kfree(ptr);
+    // void *ptr4 = kmalloc(50);
+    // if (ptr || ptr2 || ptr3 || ptr4)
+    // {
 
-    }
+    // }
 }
