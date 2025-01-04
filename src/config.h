@@ -15,4 +15,7 @@
 // Heap table start address
 #define CARBONOS_HEAP_TABLE_START_ADDR 0x00007E00
 
+// Default sector size 512
+#define CARBONOS_SECTOR_SIZE 512
+
 #endif

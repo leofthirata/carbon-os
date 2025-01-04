@@ -1,9 +1,15 @@
-#include <io/io.h>
+#include "disk.h"
+#include "io/io.h"
+#include "memory/memory.h"
+#include "config.h"
+#include "status.h"
 
 // https://wiki.osdev.org/ATA_read/write_sectors
 // https://wiki.osdev.org/ATA_Command_Matrix
 
-// read in LBA mode
+struct disk disk;
+
+// read disk sector data in LBA mode
 int disk_read_sector(int lba, int total, void *buf)
 { 
     // 0x1F6 port to send drive and bit 24-27 of lba
@@ -39,4 +45,31 @@ int disk_read_sector(int lba, int total, void *buf)
     }
 
     return 0;
+}
+
+// init disk struct
+void disk_search_and_init()
+{
+    memset(&disk, 0, sizeof(disk));
+    disk.type = CARBONOS_DISK_TYPE_REAL;
+    disk.sector_size = CARBONOS_SECTOR_SIZE;
+}
+
+// return disk (only primary disk is supported right now)
+struct disk *disk_get(int index)
+{
+    if (index != 0)
+        return 0;
+
+    return &disk;
+}
+
+int disk_read_block(struct disk *idisk, unsigned int lba, int total, void *buf)
+{
+    if (idisk != &disk)
+    {
+        return -EIO;
+    }
+
+    return disk_read_sector(lba, total, buf);
 }

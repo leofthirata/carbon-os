@@ -100,7 +100,11 @@ void kernel_main()
     // terminal_writechar('B', COLOUR_WHITE);
     print("CarbonOS!\nHello");
 
+    // Heap init
     kheap_init();
+
+    // Search and initialize the disks
+    disk_search_and_init();
 
     // Interrupt Descriptor Table init
     idt_init();
@@ -128,9 +132,9 @@ void kernel_main()
     // print(ptr);
 
     // disk read testing
-    char buf[512];
+    // char buf[512];
 
-    disk_read_sector(0, 1, buf); // place breakpoint here and, in gdb, print (unsigned char)(buf[0]) to see first byte read
+    // disk_read_sector(0, 1, buf); // place breakpoint here and, in gdb, print (unsigned char)(buf[0]) to see first byte read
     // can use bless ./bin/os.bin to read the sector as well
 
     enable_it(); // enable interrupts
