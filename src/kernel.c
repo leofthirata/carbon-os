@@ -4,6 +4,8 @@
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
 #include "disk/disk.h"
+#include "fs/pparser.h"
+#include "string/string.h"
 
 #include <stdint.h> // for uint16_t
 #include <stddef.h> // size_t
@@ -60,17 +62,6 @@ void terminal_init()
             terminal_putchar(x, y, ' ', 0);
         }
     }
-}
-
-size_t strlen(const char* str)
-{
-    size_t len = 0;
-    while(str[len])
-    {
-        len++;
-    }
-
-    return len;
 }
 
 void print(const char* str)
@@ -138,7 +129,13 @@ void kernel_main()
     // can use bless ./bin/os.bin to read the sector as well
 
     enable_it(); // enable interrupts
-    
+
+    // path parser testing
+    struct path_root *root = pparser_parse("0:/bin/shell.exe", NULL);
+    if (root)
+    {
+
+    }
     // outb(0x60, 0xFF);
     // problem();
 
