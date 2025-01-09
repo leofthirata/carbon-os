@@ -18,4 +18,7 @@
 // Default sector size 512
 #define CARBONOS_SECTOR_SIZE 512
 
+#define CARBONOS_MAX_FILE_SYSTEMS 12
+#define CARBONOS_MAX_FILE_DESCRIPTORS 512
+
 #endif

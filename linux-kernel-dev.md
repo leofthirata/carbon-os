@@ -421,5 +421,23 @@ sudo mount -t vfat ./bin/os.bin /mnt/d
 cd /mnt/d
 cat hello.txt
 
-### unmoun
+### unmount
 sudo umount /mnt/d
+
+## Virtual File System (VFS Layer)
+- abstract low level code
+- file system to load/unload from the kernel
+- allows kernel to be more memory efficient
+- same interface for all file systems
+
+### What happens when a disk is inserted
+- resolving filesystem: find a filesystem that can be used then disk binds itself to its implementation
+- e.g if attached a disk with fat header file, then a FAT filesystem must be able to manage it
+
+### Fopen communication
+user program -> fopen("0:/text.txt", "r") -> kernel
+kernel -> path parser -> path root disk 0; path part test.txt -> fat16 -> fopen
+
+### Fread communication
+user program -> fread(buf, 10, 1, file_descriptor) -> kernel
+kernel -> file descriptor -> fat16 -> fread -> buf (userprogram)
