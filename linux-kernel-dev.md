@@ -361,3 +361,65 @@ print root_path
 print *root_path
 print *root_path->first
 print *root_path->first->next
+
+## Disk streamer
+- allows to read variable size data instead of just sectors
+
+make clean
+./build.sh
+bless ./bin/os.bin
+select a btye to read and get its address (we read addr 0x201)
+gdb
+add-symbol-file ./build/kernelfull.o 0x100000
+break kernel.c:<line where disk stream is being tested>
+target remote | qemu-system-i386 -hda ./bin/os.bin -gdb stdio -S
+c
+next to step in debugger
+print c to print read byte
+
+## File Allocation Table (FAT)
+- microsoft file system
+- clusters represent data and directories
+- clusters use fixed amount of sectors
+- every file in fat16 needs at least one cluster -> wasted storage
+- fat16 no more than 2gb files
+- fat16 disk layout: boot sector -> reserved sectors -> fat1 -> fat2 -> root dir -> data clusters
+- all fat16 sectors are 512 bytes
+- each entry is 2 bytes long
+- entry represents if region is available or taken
+- first entry byte represents another cluster index
+- if entry is 0xffff, then its the end of cluster chain (last cluster)
+
+### FAT16 Root directory
+- attribute flags:
+0x01 read only
+0x02 file hidden
+0x04 system file (do not move)
+0x08 volume label
+0x10 subdirectory
+0x20 archived
+0x40 device
+0x80 reserved and must not be changed
+
+- filename and extension
+filename is 8 bytes and unused bytes are padded with 0x20
+extension is 3 bytes and unused bytes are padded with 0x20
+
+https://en.wikipedia.org/wiki/Design_of_the_FAT_file_system
+https://wiki.osdev.org/FAT
+Common structure of the Boot Sector used by most FAT versions for IBM compatible x86 machines since DOS 2.0 
+
+### FAT now storing files (how to test)
+sudo /mnt/d
+sudo mount -t vfat ./bin/os.bin /mnt/d
+cd /mnt/d
+sudo touch hello.txt
+sudo umount /mnt/d
+bless ./bin/os.bin
+F to search for text Hello World stored in os.bin
+sudo mount -t vfat ./bin/os.bin /mnt/d
+cd /mnt/d
+cat hello.txt
+
+### unmoun
+sudo umount /mnt/d

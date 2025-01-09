@@ -4,6 +4,7 @@
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
 #include "disk/disk.h"
+#include "disk/streamer.h"
 #include "fs/pparser.h"
 #include "string/string.h"
 
@@ -131,11 +132,23 @@ void kernel_main()
     enable_it(); // enable interrupts
 
     // path parser testing
-    struct path_root *root = pparser_parse("0:/bin/shell.exe", NULL);
-    if (root)
+    // struct path_root *root = pparser_parse("0:/bin/shell.exe", NULL);
+    // if (root)
+    // {
+
+    // }
+
+    // disk streamer testing
+    struct disk_stream *stream = disk_streamer_new(0);
+    disk_streamer_seek(stream, 0x201);
+    unsigned char c = 0;
+    disk_streamer_read(stream, &c, 1);
+
+    while (1)
     {
 
     }
+
     // outb(0x60, 0xFF);
     // problem();
 

@@ -5,11 +5,59 @@ BITS 16 ; only 16 bit code
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
-_start:
-    jmp short start
-    nop
 
-times 33 db 0 ; creates 33 zeroed bytes after short jump
+; byte offset 0x00 and 3 bytes length
+jmp short start
+nop
+
+; FAT16 Header
+
+; offset 0x03 len 8 bytes
+OEMIdentifier       db 'CARBONOS'
+; offset 0x0B len 2 bytes
+BytesPerSector      dw 0x200 ; 512 bytes per sector
+; offset 0x0D len 1 byte
+SectorsPerCluster   db 0x80
+; offset 0x0E len 2 bytes
+ReservedSectors     dw 200 ; kernel will be stored here
+; offset 0x10 len 1 byte
+FATCopies           db 0x02 ; original and backup
+; offset 0x11 len 2 bytes
+RootDirEntries      dw 0x40 ; amount of root directory entries
+; offset 0x13 len 2 bytes
+NumSectors          dw 0x00 ; total sectors in logical volume; 0 means more than 65535 sectors 
+; offset 0x15 len 1 byte
+MediaType           db 0xF8 ; media descriptor type
+; offset 0x16 len 2 bytes
+SectorsPerFat       dw 0x100 ; FAT12/FAT16 only
+; offset 0x18 len 2 bytes
+SectorsPerTrack     dw 0x20
+; offset 0x1A len 2 bytes
+NumberOfHeads       dw 0x40 ; heads or sides on storage media
+; offset 0x1C len 4 bytes
+HiddenSectors       dd 0x00
+; offset 0x20 len 4 bytes
+SectorsBig          dd 0x773594 ; must be set if NumSectors is 0
+
+; Extended Boot Record (EBPB)
+; 0x24 len 1
+DriveNumber         db 0x80 ; 0x80 for hard disks
+; 0x25 len 1
+WinNTBit            db 0x00 ; flags in windows nt
+; 0x26 len 1
+Signature           db 0x29 ; must be 0x28 or 0x29
+; 0x27 len 4
+VolumeID            dd 0xD105 ; serial number
+; 0x2B len 11
+VolumeIDString      db 'CARBON BOOT' ; volume label string
+; 0x36 len 8
+SystemIDString      db 'FAT16   ' ; system identifier string
+; 0x3E len 448
+; 0x1FE len 2       dw 0x55AA
+
+
+;line below is to reserve space for fat header in future
+;times 33 db 0 ; creates 33 zeroed bytes after short jump
 
 start:
     jmp 0:step2

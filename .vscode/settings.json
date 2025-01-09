@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "memory.h": "c",
-        "kheap.h": "c"
+        "kheap.h": "c",
+        "pparser.h": "c"
     }
 }
