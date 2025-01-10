@@ -441,3 +441,7 @@ kernel -> path parser -> path root disk 0; path part test.txt -> fat16 -> fopen
 ### Fread communication
 user program -> fread(buf, 10, 1, file_descriptor) -> kernel
 kernel -> file descriptor -> fat16 -> fread -> buf (userprogram)
+
+## GDB
+
+break <function name>

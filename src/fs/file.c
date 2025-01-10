@@ -4,6 +4,7 @@
 #include "memory/heap/kheap.h"
 #include "status.h"
 #include "kernel.h"
+#include "fat/fat16.h"
 
 // every file system in the system
 struct file_system *file_systems[CARBONOS_MAX_FILE_SYSTEMS];
@@ -39,7 +40,7 @@ void fs_insert_file_system(struct file_system *file_system)
 
 static void fs_static_load()
 {
-    // fs_insert_file_system(fat16_init());
+    fs_insert_file_system(fat16_init());
 }
 
 void fs_load()

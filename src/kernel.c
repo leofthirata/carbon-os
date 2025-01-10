@@ -7,6 +7,7 @@
 #include "disk/streamer.h"
 #include "fs/pparser.h"
 #include "string/string.h"
+#include "fs/fat/fat16.h"
 
 #include <stdint.h> // for uint16_t
 #include <stddef.h> // size_t
@@ -95,6 +96,9 @@ void kernel_main()
     // Heap init
     kheap_init();
 
+    // File system init
+    fs_init();
+
     // Search and initialize the disks
     disk_search_and_init();
 
@@ -143,6 +147,10 @@ void kernel_main()
     disk_streamer_seek(stream, 0x201);
     unsigned char c = 0;
     disk_streamer_read(stream, &c, 1);
+
+    // strcpy method testing
+    // char buf[20];
+    // strcpy(buf, "teste");
 
     while (1)
     {
