@@ -5,6 +5,10 @@
 #include "status.h"
 #include "kernel.h"
 #include "fat/fat16.h"
+#include "disk/disk.h"
+#include "string/string.h"
+
+// virtual file system layer
 
 // every file system in the system
 struct file_system *file_systems[CARBONOS_MAX_FILE_SYSTEMS];
@@ -105,7 +109,91 @@ struct file_system *fs_resolve(struct disk *disk)
     return fs;
 }
 
-int fopen(const char *file_name, const char *mode)
+// get fopen mode
+FILE_MODE file_get_mode_by_string(const char *str)
 {
-    return -EIO;
+    FILE_MODE mode = FILE_MODE_INVALID;
+    if (strncmp(str, "r", 1) == 0)
+    {
+        mode = FILE_MODE_READ;
+    }
+    else if (strncmp(str, "w", 1) == 0)
+    {
+        mode = FILE_MODE_WRITE;
+    }
+    else if (strncmp(str, "a", 1) == 0)
+    {
+        mode = FILE_MODE_APPEND;
+    }
+    return mode;
+}
+
+// virtual open file function
+int fopen(const char *file_name, const char *mode_str)
+{
+    int res = 0;
+
+    // gets path parsed
+    struct path_root *root_path = pparser_parse(file_name, NULL);
+    if (!root_path)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    // needs more than just root path 0:/ needs 0:/first_part
+    if (!root_path->first)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    // ensure disk exists
+    struct disk *disk = disk_get(root_path->drive_num);
+    if (!disk)
+    {
+        res = -EIO;
+        goto out;
+    }
+
+    // check if disk has file system linked
+    if (!disk->file_system)
+    {
+        res = -EIO;
+        goto out;
+    }
+
+    // get fopen mode
+    FILE_MODE mode = file_get_mode_by_string(mode_str);
+    if (mode == FILE_MODE_INVALID)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    // call non virtual fopen (fat16_open e.g) 
+    void *descriptor_private_data = disk->file_system->open(disk, root_path->first, mode);
+
+    if (ISERR(descriptor_private_data))
+    {
+        res = ERROR_I(descriptor_private_data);
+        goto out;
+    }
+
+    struct file_descriptor *desc = 0;
+    res = file_new_descriptor(&desc);
+    if (res < 0)
+    {
+        goto out;
+    }
+    desc->file_system = disk->file_system;
+    desc->private = descriptor_private_data;
+    desc->disk = disk;
+    res = desc->index;
+
+out:
+    if (res < 0)
+        res = 0;
+
+    return res;
 }

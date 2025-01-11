@@ -11,4 +11,11 @@
 void kernel_main();
 void print(const char* str);
 
+// cast to void *
+#define ERROR(value) (void*)(value)
+// cast to int
+#define ERROR_I(value) (int)(value)
+// cast to int and check if below zero
+#define ISERR(value) ((int)value < 0)
+
 #endif

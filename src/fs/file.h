@@ -49,7 +49,7 @@ struct file_descriptor
 };
 
 void fs_init();
-int fopen(const char *file_name, const char *mode);
+int fopen(const char *file_name, const char *mode_str);
 void fs_insert_filesystem(struct file_system *file_system);
 struct file_system *fs_resolve(struct disk *disk);
 
