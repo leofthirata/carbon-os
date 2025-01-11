@@ -13,7 +13,12 @@ struct disk
     CARBONOS_DISK_TYPE type;
     int sector_size;
 
+    int id;
+
     struct file_system *file_system;
+
+    // file system private data
+    void *fs_private;
 };
 
 void disk_search_and_init();

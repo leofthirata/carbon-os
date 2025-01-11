@@ -3,6 +3,7 @@
 #include "config.h"
 
 // creates first disk stream which position is 0
+// allows us to bind to a disk and read desired bytes
 struct disk_stream *disk_streamer_new(int disk_id)
 {
     struct disk *disk = disk_get(disk_id);
@@ -25,7 +26,7 @@ int disk_streamer_seek(struct disk_stream *stream, int pos)
     return 0;
 }
 
-// read amount of desired bytes
+// read amount of desired bytes and shifts its index
 int disk_streamer_read(struct disk_stream *stream, void *out, int total)
 {
     int sector = stream->pos / CARBONOS_SECTOR_SIZE;
