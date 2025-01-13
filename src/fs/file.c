@@ -21,6 +21,7 @@ static struct file_system **fs_get_free_file_system()
     for (i = 0; i < CARBONOS_MAX_FILE_SYSTEMS; i++)
     {
         // get empty file system slot and return its addr
+        // if file system index is pointing to nothing
         if (file_systems[i] == 0)
         {
             return &file_systems[i];
@@ -29,9 +30,11 @@ static struct file_system **fs_get_free_file_system()
     return 0;
 }
 
+// 
 void fs_insert_file_system(struct file_system *file_system)
 {
     struct file_system **fs;
+
     fs = fs_get_free_file_system();
     if (!fs)
     {
@@ -39,26 +42,35 @@ void fs_insert_file_system(struct file_system *file_system)
         while (1) {}
     }
 
+    // *fs points to file system inserted addr
+    // **fs points to file system data
     *fs = file_system;
 }
 
+// loads file system in the file system array
 static void fs_static_load()
 {
     fs_insert_file_system(fat16_init());
 }
 
+// creates all 12 file systems, zeroes them, and loads them
 void fs_load()
 {
     memset(file_systems, 0, sizeof(file_systems));
     fs_static_load();
 }
 
+// creates all 512 file descriptors, zeroes them, and loads them
 void fs_init()
 {
     memset(file_descriptors, 0, sizeof(file_descriptors));
     fs_load();
 }
 
+// finds available index, creates descriptor in memory, adds to descriptor array
+// desc_out points to address of pointer of new descriptor
+// *desc_out points to new descriptor address
+// **desc_out points to new descriptor data
 static int file_new_descriptor(struct file_descriptor **desc_out)
 {
     int res = -ENOMEM;
@@ -82,6 +94,7 @@ static int file_new_descriptor(struct file_descriptor **desc_out)
     return res;
 }
 
+// returns file descriptor relative to the index param
 static struct file_descriptor *file_get_descriptor(int fd)
 {
     if (fd <= 0 || fd >= CARBONOS_MAX_FILE_DESCRIPTORS)
@@ -94,11 +107,13 @@ static struct file_descriptor *file_get_descriptor(int fd)
     return file_descriptors[index];
 }
 
+// binds disk to its respective file system
 struct file_system *fs_resolve(struct disk *disk)
 {
     struct file_system *fs = 0;
     for (int i = 0; i < CARBONOS_MAX_FILE_SYSTEMS; i++)
     {
+        // if file system exists and its designed for this disk
         if (file_systems[i] != 0 && file_systems[i]->resolve(disk) == 0)
         {
             fs = file_systems[i];
@@ -195,5 +210,28 @@ out:
     if (res < 0)
         res = 0;
 
+    return res;
+}
+
+// nmemb: memory blocks
+int fread(void *ptr, uint32_t size, uint32_t nmemb, int fd)
+{
+    int res = 0;
+    if (size == 0 || nmemb == 0 || fd < 1)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    struct file_descriptor *desc = file_get_descriptor(fd);
+    if (!desc)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    res = desc->file_system->read(desc->disk, desc->private, size, nmemb, (char *)ptr);
+
+out:
     return res;
 }

@@ -44,6 +44,7 @@ int disk_streamer_read(struct disk_stream *stream, void *out, int total)
     
     // increments size of out buf to avoid overflow
     // stores 512 bytes or less in out buf
+    // offsets sector to desired data index and increments until total size
     for (int i = 0; i < total_to_read; i++)
     {
         *(char *)out++ = buf[offset + i];
@@ -63,6 +64,7 @@ out:
     return res;
 }
 
+// frees streamer memory
 void disk_streamer_close(struct disk_stream *stream)
 {
     kfree(stream);

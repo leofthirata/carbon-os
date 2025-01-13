@@ -91,7 +91,7 @@ void kernel_main()
 
     // terminal_writechar('A', COLOUR_WHITE);
     // terminal_writechar('B', COLOUR_WHITE);
-    print("CarbonOS!\nHello");
+    // print("CarbonOS!\nHello");
 
     // Heap init
     kheap_init();
@@ -143,10 +143,19 @@ void kernel_main()
     // }
 
     // disk streamer testing
-    struct disk_stream *stream = disk_streamer_new(0);
-    disk_streamer_seek(stream, 0x201);
-    unsigned char c = 0;
-    disk_streamer_read(stream, &c, 1);
+    // struct disk_stream *stream = disk_streamer_new(0);
+    // disk_streamer_seek(stream, 0x201);
+    // unsigned char c = 0;
+    // disk_streamer_read(stream, &c, 1);
+
+    int fd = fopen("0:/hello.txt", "r");
+    if (fd)
+    {
+        print("FOPEN hello.txt\n");
+        char buf[6];
+        fread(buf, 6, 1, fd);
+        print(buf);
+    }
 
     // strcpy method testing
     // char buf[20];

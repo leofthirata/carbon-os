@@ -29,6 +29,7 @@ static int pparser_get_drive_by_path(const char **path)
     return drive_num;
 }
 
+// allocates memory for root path
 static struct path_root *pparser_create_root(int drive_num)
 {
     struct path_root *path_r = kzalloc(sizeof(struct path_root));
@@ -67,7 +68,7 @@ static const char *pparser_path_get_part(const char **path)
     return part;
 }
 
-// create part and return a linked list
+// find next part of path and create part if valid, and return a linked list
 struct path_part *pparser_path_parse_part(struct path_part *last, const char **path)
 {
     const char *part_str = pparser_path_get_part(path);
@@ -88,7 +89,7 @@ struct path_part *pparser_path_parse_part(struct path_part *last, const char **p
     return part;
 }
 
-// iterates through everything and free
+// iterates through every part found and free its memory
 void pparser_free(struct path_root *root)
 {
     struct path_part *part = root->first;
