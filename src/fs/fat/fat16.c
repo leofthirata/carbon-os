@@ -636,7 +636,7 @@ struct fat_item *fat16_find_item_in_dir(struct disk *disk, struct fat_directory 
         if (istrncmp(tmp_filename, name, sizeof(tmp_filename)) == 0)
         {
             // item found, create new fat item
-            f_item = fat16_new_fat_item_for_dir_item(disk, directory->item);
+            f_item = fat16_new_fat_item_for_dir_item(disk, &directory->item[i]);
         }
     }
 

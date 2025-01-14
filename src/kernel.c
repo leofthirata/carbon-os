@@ -91,7 +91,7 @@ void kernel_main()
 
     // terminal_writechar('A', COLOUR_WHITE);
     // terminal_writechar('B', COLOUR_WHITE);
-    // print("CarbonOS!\nHello");
+    print("CarbonOS!\n");
 
     // Heap init
     kheap_init();
@@ -152,8 +152,9 @@ void kernel_main()
     if (fd)
     {
         print("FOPEN hello.txt\n");
-        char buf[6];
-        fread(buf, 6, 1, fd);
+        char buf[9];
+        buf[8] = 0x00;
+        fread(buf, 9, 1, fd);
         print(buf);
     }
 
