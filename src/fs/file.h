@@ -9,7 +9,7 @@ enum
 {
     SEEK_SET,
     SEEK_CUR,
-    SEEK_EN,
+    SEEK_END,
 };
 
 typedef unsigned int FILE_MODE;
@@ -25,6 +25,7 @@ struct disk;
 
 typedef int (*FS_RESOLVE_FUNCTION)(struct disk *disk);
 typedef int (*FS_READ_FUNCTION)(struct disk *disk, void *private, uint32_t size, uint32_t nmemb, char *out);
+typedef int (*FS_SEEK_FUNCTION)(void *private, uint32_t offset, FILE_SEEK_MODE seek_mode);
 typedef void *(*FS_OPEN_FUNCTION)(struct disk *disk, struct path_part *path, FILE_MODE mode);
 
 struct file_system
@@ -33,6 +34,7 @@ struct file_system
     FS_RESOLVE_FUNCTION resolve;
     FS_OPEN_FUNCTION open;
     FS_READ_FUNCTION read;
+    FS_SEEK_FUNCTION seek;
 
     // fielsystem name
     char name[20];
@@ -56,5 +58,6 @@ int fopen(const char *file_name, const char *mode_str);
 int fread(void *ptr, uint32_t size, uint32_t nmemb, int fd);
 void fs_insert_filesystem(struct file_system *file_system);
 struct file_system *fs_resolve(struct disk *disk);
+int fseek(int fd, int offset, FILE_SEEK_MODE whence);
 
 #endif

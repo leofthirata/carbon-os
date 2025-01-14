@@ -154,7 +154,9 @@ void kernel_main()
         print("FOPEN hello.txt\n");
         char buf[9];
         buf[8] = 0x00;
-        fread(buf, 9, 1, fd);
+        // shifts 2 bytes the file descriptor fd  
+        fseek(fd, 2, SEEK_SET);
+        fread(buf, 7, 1, fd);
         print(buf);
     }
 
