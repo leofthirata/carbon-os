@@ -75,6 +75,12 @@ void print(const char* str)
     }
 }
 
+void panic(const char *msg)
+{
+    print(msg);
+    while (1) {}
+}
+
 void kernel_main()
 {
     // char *video_mem = (char *)(0xB8000); // display address
@@ -86,6 +92,10 @@ void kernel_main()
     // uint16_t *video_mem = (uint16_t *)(0xB8000); // display address
     
     terminal_init();
+
+    // kernel panic implementation
+    // panic("System cannot continue!");
+
     // video_mem[0] = 0x0341; // endian ascii A -> 0x4103
     // video_mem[1] = terminal_print_char('X', COLOUR_WHITE); // endian ascii A -> 0x4103
 
@@ -164,8 +174,10 @@ void kernel_main()
         // fstat fclose testing
         fstat(fd, &s);
         fclose(fd);
-
         print("closing\n");
+
+        fstat(fd, &s);
+        print("fstat\n");
     }
 
     // strcpy method testing
