@@ -149,15 +149,20 @@ void kernel_main()
     // disk_streamer_read(stream, &c, 1);
 
     int fd = fopen("0:/hello.txt", "r");
+    struct file_stat s;
     if (fd)
     {
-        print("FOPEN hello.txt\n");
-        char buf[9];
-        buf[8] = 0x00;
-        // shifts 2 bytes the file descriptor fd  
-        fseek(fd, 2, SEEK_SET);
-        fread(buf, 7, 1, fd);
-        print(buf);
+        // fread fseek testing
+        // print("FOPEN hello.txt\n");
+        // char buf[9];
+        // buf[8] = 0x00;
+        // // shifts 2 bytes the file descriptor fd  
+        // fseek(fd, 2, SEEK_SET);
+        // fread(buf, 7, 1, fd);
+        // print(buf);
+
+        // fstat testing
+        fstat(fd, &s);
     }
 
     // strcpy method testing
