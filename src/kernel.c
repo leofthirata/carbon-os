@@ -161,8 +161,11 @@ void kernel_main()
         // fread(buf, 7, 1, fd);
         // print(buf);
 
-        // fstat testing
+        // fstat fclose testing
         fstat(fd, &s);
+        fclose(fd);
+
+        print("closing\n");
     }
 
     // strcpy method testing

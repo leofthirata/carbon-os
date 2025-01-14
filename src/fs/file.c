@@ -143,6 +143,14 @@ FILE_MODE file_get_mode_by_string(const char *str)
     return mode;
 }
 
+// needed because private data is being freed in fat16 layer
+// so its freeing the file desc position and also the descriptor
+static void file_free_descriptor(struct file_descriptor *desc)
+{
+    file_descriptors[desc->index-1] = 0x00;
+    kfree(desc);
+}
+
 // virtual open file function
 int fopen(const char *file_name, const char *mode_str)
 {
@@ -264,6 +272,27 @@ int fstat(int fd, struct file_stat *stat)
     }
 
     res = desc->file_system->stat(desc->disk, desc->private, stat);
+
+out:
+    return res;
+}
+
+int fclose(int fd)
+{
+    int res = 0;
+    struct file_descriptor *desc = file_get_descriptor(fd);
+    if (!desc)
+    {
+        res = -EIO;
+        goto out;
+    }
+
+    res = desc->file_system->close(desc->private);
+
+    if (res == CARBONOS_OK)
+    {
+        file_free_descriptor(desc);
+    }
 
 out:
     return res;
