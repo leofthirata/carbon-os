@@ -445,3 +445,28 @@ kernel -> file descriptor -> fat16 -> fread -> buf (userprogram)
 ## GDB
 
 break <function name>
+
+## KernelLand
+- where kernel runs
+- maximum priviledge state
+- RING0
+- any CPU instruction can run
+
+## UserLand
+- processor is in limited priviledge state
+- where OS process runs
+- RING3
+- if a fault occurs, kernel is able to intervene
+- memory access may be restricted to certain locations
+- only allowed CPU instructions, otherwise, protection fault will happen
+- no switching page instructions
+
+### Getting to user land
+1. setup user code and data segments
+2. setup a TSS (task switch segment)
+3. pretend we are returning from an interrupt
+
+### TSS
+- hold stack pointer and stack segment from kernel land
+- handles the return from the userland
+- if an interrupt happens in user land, TSS will restore stack poitner and then invoke the interrupt handler

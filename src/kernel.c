@@ -2,12 +2,15 @@
 #include "idt/idt.h"
 #include "io/io.h"
 #include "memory/heap/kheap.h"
+#include "memory/memory.h"
 #include "memory/paging/paging.h"
 #include "disk/disk.h"
 #include "disk/streamer.h"
 #include "fs/pparser.h"
 #include "string/string.h"
 #include "fs/fat/fat16.h"
+#include "gdt/gdt.h"
+#include "config.h"
 
 #include <stdint.h> // for uint16_t
 #include <stddef.h> // size_t
@@ -81,6 +84,13 @@ void panic(const char *msg)
     while (1) {}
 }
 
+struct gdt gdt_real[CARBONOS_TOTAL_GDT_SEGMENTS];
+struct gdt_structured gdt_structured[CARBONOS_TOTAL_GDT_SEGMENTS] = {
+    {.base = 0x00, .limit = 0x00, .type = 0x00},
+    {.base = 0x00, .limit = 0xffffffff, .type = 0x9a},
+    {.base = 0x00, .limit = 0xffffffff, .type = 0x92}
+};
+
 void kernel_main()
 {
     // char *video_mem = (char *)(0xB8000); // display address
@@ -102,6 +112,12 @@ void kernel_main()
     // terminal_writechar('A', COLOUR_WHITE);
     // terminal_writechar('B', COLOUR_WHITE);
     print("CarbonOS!\n");
+
+    memset(gdt_real, 0x00, sizeof(gdt_real));
+    gdt_structured_to_gdt(gdt_real, gdt_structured, CARBONOS_TOTAL_GDT_SEGMENTS);
+
+    // load gdt
+    gdt_load(gdt_real, sizeof(gdt_real));    
 
     // Heap init
     kheap_init();
